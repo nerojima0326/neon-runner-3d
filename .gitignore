@@ -1,0 +1,11 @@
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# 개인 설정 (Claude Code 로컬 설정)
+.claude/settings.local.json
+
+# 의존성 · 서버 배포 산출물 (server/worker.js를 Cloudflare로 배포할 때)
+node_modules/
+.wrangler/
