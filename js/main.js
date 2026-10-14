@@ -72,6 +72,12 @@ async function openRanking(tab = 'classic') {
   ui.renderRanking(tab, tab === 'daily' ? profile.daily.board : profile.board, profile.name, onlineEnabled());
 }
 function openSettings() { ui.renderSettings(profile, VERSION); ui.showPanel('settings'); }
+// 게임 방법 창: PLAY(또는 데일리 도전)를 누르면 시작 전에 띄움. '다음부터 바로 시작'을 체크하면 건너뜀 (설정 · 메뉴 버튼으로 다시 볼 수 있음)
+let howtoMode = 'classic', howtoTab = 'keys';
+const atHowto = () => G.state === 'menu' && ui.panelOpen('howto');
+function renderHowto() { ui.renderHowto(howtoTab, { touch: TOUCH, colors: O.OBS_COLOR, skip: !profile.settings.howto, mode: howtoMode }); }
+function openHowto(mode = 'classic') { howtoMode = mode; howtoTab = 'keys'; renderHowto(); ui.showPanel('howto'); }
+function requestStart(mode = 'classic') { if (profile.settings.howto) openHowto(mode); else startRun(mode); }
 
 // ---------- 러닝 시작 / 종료 ----------
 function startRun(mode = 'classic') {
@@ -475,7 +481,7 @@ function pollGamepad() {
   const pressed = k => now[k] && !padPrev[k];   // 눌리는 순간만
   if (pressed('left')) moveLeft();
   if (pressed('right')) moveRight();
-  if (pressed('jump')) { if (atMainMenu()) startRun('classic'); else if (G.state === 'results') { leaveResults(); startRun(G.mode); } else jump(); }
+  if (pressed('jump')) { if (atMainMenu()) requestStart('classic'); else if (atHowto()) startRun(howtoMode); else if (G.state === 'results') { leaveResults(); startRun(G.mode); } else jump(); }
   if (pressed('roll')) roll();
   if (pressed('dash')) dash();
   if (pressed('pause') && (G.state === 'playing' || G.state === 'paused')) togglePause();
@@ -490,16 +496,18 @@ addEventListener('keydown', e => {
     return;
   }
   if (e.repeat && !['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(e.code)) return;
+  // 버튼에 포커스가 있을 때 Space/Enter는 그 버튼의 클릭으로만 (게임 시작과 겹쳐 두 번 실행되지 않게)
+  if (e.target.tagName === 'BUTTON' && (e.code === 'Space' || e.code === 'Enter') && G.state !== 'playing') return;
   switch (e.code) {
     case 'ArrowLeft': case 'KeyA': moveLeft(); break;
     case 'ArrowRight': case 'KeyD': moveRight(); break;
-    case 'ArrowUp': case 'KeyW': case 'Space': e.preventDefault(); if (atMainMenu()) startRun('classic'); else jump(); break;
+    case 'ArrowUp': case 'KeyW': case 'Space': e.preventDefault(); if (atMainMenu()) requestStart('classic'); else if (atHowto()) startRun(howtoMode); else jump(); break;
     case 'ArrowDown': case 'KeyS': e.preventDefault(); roll(); break;
     case 'KeyE': case 'ShiftLeft': case 'ShiftRight': dash(); break;
     case 'KeyP': if (G.state === 'playing' || G.state === 'paused') togglePause(); break;
     case 'Escape': if (G.state === 'playing' || G.state === 'paused') togglePause(); else if (G.state === 'menu' && !atMainMenu()) openMenu(); break;
     case 'KeyM': toggleMute(); break;
-    case 'Enter': if (atMainMenu()) startRun('classic'); else if (G.state === 'results') { leaveResults(); startRun(G.mode); } break;
+    case 'Enter': if (atMainMenu()) requestStart('classic'); else if (atHowto()) startRun(howtoMode); else if (G.state === 'results') { leaveResults(); startRun(G.mode); } break;
   }
 });
 let ts = null;
@@ -530,7 +538,10 @@ addEventListener('pagehide', () => { commitName(); flushSubmit(); });
 addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; ui.showInstall(true); });
 
 ui.bind({
-  play: () => startRun('classic'), daily: openDaily, dailyStart: () => startRun('daily'), missions: openMissions, shop: openShop,
+  play: () => requestStart('classic'), daily: openDaily, dailyStart: () => requestStart('daily'), missions: openMissions, shop: openShop,
+  howto: () => openHowto('classic'), howtoStart: () => startRun(howtoMode),
+  howtoTab(t) { howtoTab = t; renderHowto(); },
+  howtoSkip(v) { profile.settings.howto = !v; save(); },
   rank: openRanking, settings: openSettings, back: openMenu,
   resume: togglePause, quit: () => finishRun(), retry: () => { leaveResults(); startRun(G.mode); }, menu: () => { leaveResults(); openMenu(); }, share,
   roll, dash, pause: togglePause,

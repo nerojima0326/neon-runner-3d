@@ -63,9 +63,22 @@
       <button id="shopBtn">🛍 스킨 샵<small id="shopInfo"></small></button>
       <button id="rankBtn">🏅 랭킹</button>
       <button id="settingsBtn">⚙ 설정</button>
+      <button id="howtoBtn">❓ 게임 방법</button>
       <button id="installBtn" hidden>📲 앱으로 설치</button>
     </div>
     <div class="keys-hint">← → 이동 · Space 점프 (공중에서 한 번 더) · ↓ 구르기 · E 대시 · P 일시정지 · M 음소거<br>👾 5,000점부터 보스가 뒤에서 쫓아옴 · 뒤에서 다가오는 🔵 파란 오브를 먹으면 유도탄으로 공격 (보스전 중 좌우는 화면 기준)<br>🎮 게임패드: 스틱/십자키 이동 · A 점프 · B 구르기 · X 대시 · Start 일시정지</div>
+  </div>
+</section>
+
+<!-- ===== 게임 방법 (PLAY를 누르면 시작 전에 표시) ===== -->
+<section class="panel hidden" id="howto">
+  <div class="card">
+    <h2>HOW TO PLAY</h2>
+    <div class="tabs" id="howtoTabs"><button data-tab="keys" class="on">🎮 조작</button><button data-tab="obs">🚧 장애물·아이템</button><button data-tab="boss">👾 보스전</button></div>
+    <div id="howtoBody" class="howto-list"></div>
+    <label class="howto-skip"><input type="checkbox" id="howtoSkip"> 다음부터 바로 시작 <small>(메뉴의 ❓ 게임 방법 · 설정에서 다시 켤 수 있어요)</small></label>
+    <div class="row"><button data-back>← 메뉴</button><button class="primary" id="howtoStart">▶ 시작</button></div>
+    <div class="keys-hint" id="howtoKeysHint">Enter / Space 시작 · Esc 메뉴</div>
   </div>
 </section>
 
@@ -128,6 +141,7 @@
     <div class="setting"><span>음악</span><button class="toggle" id="setMusic"></button></div>
     <div class="setting"><span>화면 흔들림</span><button class="toggle" id="setShake"></button></div>
     <div class="setting"><span>초보자 힌트</span><button class="toggle" id="setHints"></button></div>
+    <div class="setting"><span>시작 전 게임 방법 <small>PLAY를 누르면 조작·장애물·보스전 설명 창</small></span><button class="toggle" id="setHowto"></button></div>
     <div class="setting"><span>진동 <small>모바일</small></span><button class="toggle" id="setVibe"></button></div>
     <div class="setting"><span>고대비 장애물 <small>색 구분이 어려울 때 · 파랑/노랑/흰색/주황</small></span><button class="toggle" id="setHC"></button></div>
     <div class="setting"><span>데일리 고스트 <small>오늘 최고 기록이 반투명으로 함께 달림</small></span><button class="toggle" id="setGhost"></button></div>

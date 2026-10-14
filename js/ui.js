@@ -1,5 +1,5 @@
 // DOM 전담: 패널 전환, HUD 갱신(변경된 값만), 메뉴/샵/미션/랭킹/설정/결과 렌더링
-import { SKINS, ACHIEVEMENTS } from './config.js';
+import { SKINS, ACHIEVEMENTS, BOSS } from './config.js';
 
 export const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -142,7 +142,68 @@ export function renderRanking(tab, rows, me, hasOnline) {
     + '</table>';
 }
 
-const TOGGLES = [['setSfx', 'sfx'], ['setMusic', 'music'], ['setShake', 'shake'], ['setHints', 'hints'], ['setVibe', 'vibration'], ['setHC', 'highContrast'], ['setGhost', 'ghost']];
+// ---------- 게임 방법 (PLAY 전에 뜨는 창) ----------
+// tab: 'keys' | 'obs' | 'boss'. o: { touch, colors(장애물 팔레트, 고대비 반영), skip, mode }
+const kbd = (...ks) => ks.map(k => `<kbd>${k}</kbd>`).join('');
+const row = (left, text, cls = 'k') => `<div class="howto-row"><div class="${cls}">${left}</div><div class="t">${text}</div></div>`;
+// 장애물 미니 그림 (게임 속 색 그대로)
+const OB_SVG = {
+  low:  c => `<path d="M8 32V20M32 32V20" stroke="#889" stroke-width="3"/><path d="M8 22H32M8 26H32M8 30H32" stroke="${c}" stroke-width="2.5"/>`,
+  bar:  c => `<path d="M8 34V6M32 34V6" stroke="#889" stroke-width="3"/><path d="M8 9H32M8 13H32M8 17H32" stroke="${c}" stroke-width="2.5"/>`,
+  wall: c => `<path d="M20 3L31 20L20 37L9 20Z" fill="${c}55" stroke="${c}" stroke-width="2.5"/>`,
+  orb:  c => `<circle cx="20" cy="20" r="8" fill="${c}"/><ellipse cx="20" cy="20" rx="14" ry="5" fill="none" stroke="${c}" stroke-width="2"/><path d="M2 33H11M29 33H38M5 30L2 33L5 36M35 30L38 33L35 36" stroke="#fff" stroke-width="2" fill="none"/>`,
+};
+const obIcon = (type, col) => `<svg viewBox="0 0 40 40" width="40" height="40" fill="none" stroke-linecap="round">${OB_SVG[type](hex(col))}</svg>`;
+const icon = e => `<span class="em">${e}</span>`;
+export function renderHowto(tab, o) {
+  document.querySelectorAll('#howtoTabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  const c = o.colors;
+  let html = '';
+  if (tab === 'keys') {
+    html = o.touch ? [
+      row(icon('👈👉'), '<b>좌우로 밀기</b> — 레인 이동 (3개 레인)'),
+      row(icon('👆'), '<b>위로 밀기 · 화면 탭</b> — 점프 · 공중에서 한 번 더 하면 <b>더블 점프</b>'),
+      row(icon('👇'), '<b>아래로 밀기 · ROLL 버튼</b> — 구르기 (공중이면 빠르게 착지)'),
+      row(icon('⚡'), '<b>DASH 버튼</b> — 하이퍼 대시: 에너지 바가 꽉 차면 몇 초간 무적 + 장애물을 부숨'),
+      row(icon('❚❚'), '<b>일시정지 버튼</b> — 오른쪽 위'),
+    ].join('') : [
+      row(kbd('←', '→') + kbd('A', 'D'), '<b>레인 이동</b> (3개 레인)'),
+      row(kbd('Space', '↑', 'W'), '<b>점프</b> · 공중에서 한 번 더 누르면 <b>더블 점프</b>'),
+      row(kbd('↓', 'S'), '<b>구르기</b> (공중에서 누르면 빠르게 착지)'),
+      row(kbd('E', 'Shift'), '<b>하이퍼 대시</b> — 에너지 바가 꽉 차면 몇 초간 무적 + 장애물을 부숨'),
+      row(kbd('P', 'Esc') + kbd('M'), '<b>일시정지</b> · M <b>음소거</b>'),
+      row(icon('🎮'), '게임패드: 스틱/십자키 이동 · A 점프 · B 구르기 · X 대시 · Start 일시정지'),
+    ].join('');
+  } else if (tab === 'obs') {
+    html = [
+      row(obIcon('low', c.low), '<b>낮은 레이저</b> → <b>점프</b>로 넘기', 'ob'),
+      row(obIcon('bar', c.bar), '<b>머리 높이 게이트</b> → <b>구르기</b>로 밑으로 통과', 'ob'),
+      row(obIcon('wall', c.wall), '<b>크리스탈 기둥</b> → <b>옆 레인</b>으로 피하기 (더블 점프로 넘을 수도)', 'ob'),
+      row(obIcon('orb', c.orb), '<b>플라즈마 오브</b> → 좌우로 움직여요. 바닥의 경로를 보고 피하기', 'ob'),
+      row(icon('💰'), '<b>코인</b> — 연달아 먹으면 <b>콤보</b> 배율 상승(최대 ×5) · 대시 에너지 충전'),
+      row(icon('🛡🧲⏱✨'), '<b>아이템</b> — 방어막(1번 막아 줌) · 자석(코인 끌어당김) · 슬로우모 · 점수 2배'),
+      row(icon('😎'), '장애물을 <b>아슬아슬하게</b> 피하면 CLOSE CALL 보너스 점수'),
+    ].join('');
+  } else {
+    html = [
+      row(icon('👾'), `<b>${BOSS.FIRST_SCORE.toLocaleString()}점</b>이 되면 보스가 <b>뒤에서</b> 쫓아와요 (그 뒤 ${BOSS.EVERY.toLocaleString()}점마다 다음 보스). 카메라가 앞으로 돌아가 플레이어 얼굴이 보여요`),
+      row(icon('↔️'), '보스전 중 <b>좌우는 화면 기준</b> — 화면 왼쪽으로 가려면 그대로 왼쪽 ' + (o.touch ? '밀기' : '키')),
+      row(icon('🟥'), '<b>레인 레이저</b> — 바닥이 깜빡이는 레인에 빔이 떨어져요 → <b>옆 레인</b>으로'),
+      row(icon('💣'), '<b>굴러오는 폭탄</b> → <b>점프</b>하거나 옆 레인으로'),
+      row(obIcon('low', c.low), '<b>소환 장애물</b> — 뒤에서 덮쳐와요. 평소처럼 점프 · 구르기 · 피하기', 'ob'),
+      row(icon('🔵'), `<b>파란 오브</b>를 먹으면 유도탄 발사 → 보스 HP −1 + <b>${BOSS.STUN_TIME}초 그로기</b>(공격 멈춤)`),
+      row(icon('⏱'), `<b>${BOSS.TIME_LIMIT}초</b> 안에 HP를 0으로! 못 잡으면 도망가요. 격파하면 점수 + 코인 보상`),
+      row(icon('⚡🛡'), `대시 중엔 폭탄을 부수고 레이저를 통과 · 방어막은 공격 1번을 막아 줘요`),
+    ].join('');
+  }
+  $('howtoBody').innerHTML = html;
+  $('howtoBody').classList.toggle('narrow', tab !== 'keys' || o.touch);   // 그림·이모지만 있는 탭은 왼쪽 칸을 좁게 통일 (키보드 키 목록만 넓게)
+  $('howtoSkip').checked = o.skip;
+  $('howtoStart').textContent = o.mode === 'daily' ? '▶ 데일리 도전' : '▶ 시작';
+  $('howtoKeysHint').hidden = o.touch;
+}
+
+const TOGGLES = [['setSfx', 'sfx'], ['setMusic', 'music'], ['setShake', 'shake'], ['setHints', 'hints'], ['setHowto', 'howto'], ['setVibe', 'vibration'], ['setHC', 'highContrast'], ['setGhost', 'ghost']];
 export function renderSettings(profile, version) {
   const s = profile.settings;
   $('setName').value = profile.name;
@@ -198,6 +259,9 @@ export function bind(h) {
   const on = (id, fn) => $(id).addEventListener('click', fn);
   on('playBtn', h.play); on('dailyBtn', h.daily); on('dailyStartBtn', h.dailyStart); on('missionsBtn', h.missions);
   on('shopBtn', h.shop); on('rankBtn', () => h.rank('classic')); on('settingsBtn', h.settings); on('installBtn', h.install);
+  on('howtoBtn', h.howto); on('howtoStart', h.howtoStart);
+  $('howtoTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) h.howtoTab(b.dataset.tab); });
+  $('howtoSkip').addEventListener('change', e => h.howtoSkip(e.target.checked));
   document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', h.back));
   on('resumeBtn', h.resume); on('quitBtn', h.quit); on('retryBtn', h.retry); on('menuBtn', h.menu); on('shareBtn', h.share);
   // ROLL / DASH는 click(터치가 끝난 뒤)이 아니라 pointerdown(닿는 순간)에 발동 → 반응이 한 박자 빠름

@@ -13,7 +13,8 @@ const DEFAULT = () => ({
   autoTier: '',                                           // 자동 품질이 내려간 단계 (기기별로 기억)
   board: [],                                              // 클래식 랭킹 top 10
   daily: { date: '', best: 0, board: [], played: false }, // 오늘의 데일리 (+ ghost: 오늘 최고 기록 주행)
-  settings: { brightness: 1, quality: 'auto', sfx: true, music: true, shake: !reducedMotion, hints: true, vibration: true, highContrast: false, ghost: true },
+  settings: { brightness: 1, quality: 'auto', sfx: true, music: true, shake: !reducedMotion, hints: true, vibration: true, highContrast: false, ghost: true,
+    howto: true },                                        // howto: PLAY를 누르면 게임 방법 창부터 보여 줌
   version: VERSION,
 });
 

@@ -148,6 +148,20 @@ tr.me td { color:var(--cyan); }
 .toggle::after { content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:left .15s; }
 .toggle.on { background:var(--cyan); } .toggle.on::after { left:23px; }
 
+/* 게임 방법 (PLAY 전) */
+.howto-list { display:flex; flex-direction:column; gap:7px; }
+.howto-row { display:flex; align-items:center; gap:12px; padding:8px 12px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.03); font-size:14px; line-height:1.45; }
+.howto-row .k { flex:0 0 128px; display:flex; flex-wrap:wrap; gap:4px; }
+.howto-row .ob { flex:0 0 40px; width:40px; height:40px; display:grid; place-items:center; border-radius:10px; background:rgba(0,0,0,.35); }
+.howto-row .t { flex:1; min-width:0; }
+.howto-row .t b { color:var(--cyan); }
+.howto-row .em { font-size:20px; line-height:1.15; }
+.howto-list.narrow .howto-row > div:first-child { flex:0 0 52px; width:52px; display:flex; flex-wrap:wrap; justify-content:center; text-align:center; }
+kbd { display:inline-block; min-width:24px; padding:3px 7px; border-radius:6px; border:1px solid rgba(255,255,255,.35); border-bottom-width:3px; background:rgba(255,255,255,.08); font:700 12px/1.2 'Segoe UI','Malgun Gothic',system-ui,sans-serif; text-align:center; color:#fff; }
+.howto-skip { display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; opacity:.85; cursor:pointer; flex-wrap:wrap; }
+.howto-skip input { width:16px; height:16px; accent-color:var(--cyan); }
+.howto-skip small { display:inline; margin:0; }
+
 /* 결과 · 컨티뉴 · 데일리 */
 .big { font-size:52px; font-weight:900; color:var(--yellow); text-shadow:0 0 14px var(--yellow); text-align:center; line-height:1; }
 .badge { text-align:center; color:var(--pink); font-weight:800; min-height:20px; animation:pulse .8s infinite alternate; }
@@ -173,6 +187,8 @@ tr.me td { color:var(--cyan); }
 @media (max-width:480px) {
   .card { padding:18px 14px; gap:12px; }
   .menu-grid { grid-template-columns:1fr; }
+  .howto-row { gap:10px; padding:7px 10px; font-size:13px; } .howto-row .k { flex-basis:96px; }
+  .tabs button { padding:6px 9px; }
   .hud-top { padding:10px 14px; } .value { font-size:22px; }
   #abilities { left:14px; bottom:14px; } #speedbar { display:none; }
 }
