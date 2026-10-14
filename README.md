@@ -1,5 +1,7 @@
 # Neon Runner 3D
 
+### ▶ [바로 플레이: nerojima0326.github.io/neon-runner-3d](https://nerojima0326.github.io/neon-runner-3d/)
+
 네온 신스웨이브 세계를 질주하는 3D 러너 게임. 순수 HTML/CSS/JS + Three.js, 빌드 도구·서버 프레임워크 없이 **정적 파일만으로** 동작합니다.
 
 ## 실행
