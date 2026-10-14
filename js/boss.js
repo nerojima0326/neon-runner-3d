@@ -79,8 +79,9 @@ const spiralMat = new THREE.SpriteMaterial({ ...ADD, color: 0xffffff, map: (() =
   g.stroke(); return new THREE.CanvasTexture(c);
 })() });
 
-// .gltf는 원본 색·거칠기·AO 텍스처를 빼고(네온 재질로 덮으니 불필요) 노멀맵만 받음. .glb는 그대로
-function loadGltf(url) {
+// .gltf는 원본 색·거칠기·AO 텍스처를 빼고(네온 재질로 덮으니 불필요) 노멀맵만 받음. .glb는 그대로.
+// texBase: 텍스처가 .gltf 옆이 아닌 다른 폴더에 있을 때(Poly Haven은 .../jpg/1k/이름/) 그 주소 + 파일 이름으로 받음
+function loadGltf(url, texBase) {
   const loader = new GLTFLoader();
   if (!/\.gltf(\?|$)/i.test(url)) return loader.loadAsync(url).then(g => g.scene);
   return fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(json => {
@@ -88,6 +89,7 @@ function loadGltf(url) {
       if (m.pbrMetallicRoughness) { delete m.pbrMetallicRoughness.baseColorTexture; delete m.pbrMetallicRoughness.metallicRoughnessTexture; }
       delete m.occlusionTexture; delete m.emissiveTexture;
     }
+    if (texBase) for (const im of json.images || []) if (im.uri && !/^(data|https?):/.test(im.uri)) im.uri = texBase + im.uri.split('/').pop();
     return new Promise((res, rej) => loader.parse(JSON.stringify(json), url.slice(0, url.lastIndexOf('/') + 1), g => res(g.scene), rej));
   });
 }
@@ -115,7 +117,7 @@ let cur = -1;                      // 지금 보스의 모델 번호
 export function loadModel(i) {
   const M = BOSS.MODELS?.[i];
   if (!M?.url) return Promise.resolve(false);
-  return (loading[i] ??= loadGltf(M.url).then(root => {
+  return (loading[i] ??= loadGltf(M.url, M.texBase).then(root => {
     if (M.cut) cutBottom(root, M.cut);
     root.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(root), size = box.getSize(new THREE.Vector3());

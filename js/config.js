@@ -1,7 +1,7 @@
 // ============================================================
 //  게임 설정 · 밸런스 · 콘텐츠 정의 (코드 수정 없이 여기만 바꿔도 됨)
 // ============================================================
-export const VERSION = '2.7.0';   // 바꾸면 서비스워커 캐시도 함께 갱신됨 (sw.js?v=VERSION)
+export const VERSION = '2.7.1';   // 바꾸면 서비스워커 캐시도 함께 갱신됨 (sw.js?v=VERSION)
 
 // 온라인 랭킹 서버 주소. 비워두면 로컬 랭킹만 사용. (README 참고)
 export const ONLINE_LEADERBOARD_URL = '';
@@ -99,9 +99,11 @@ export const BOSS = {
   MODELS: [
     // 사자 머리: Tina 제작, CC0 (Poly Haven 'lion_head', 노멀맵 포함 1.8MB · 삼각형 4.7만 개)
     { url: 'https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/lion_head/lion_head_1k.gltf',
+      texBase: 'https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/lion_head/',   // Poly Haven은 텍스처를 다른 폴더에 둠
       size: 7.5, eyes: [[-0.095, 0.21], [0.095, 0.21]], eyeSize: 1.3, mouth: [0, -0.1] },
     // 황소 머리: Tina 제작, CC0 (Poly Haven 'bull_head', 노멀맵 포함 0.9MB · 삼각형 1.7만 개). 아래 받침대는 잘라냄
     { url: 'https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/bull_head/bull_head_1k.gltf',
+      texBase: 'https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/bull_head/',
       size: 7.5, cut: 0.2, eyes: [[-0.14, 0.06], [0.14, 0.06]], eyeSize: 1.4, mouth: [0, -0.3] },
     // 해골: Vladimir Petkovic 제작, CC0 (Khronos glTF-Sample-Assets 'ScatteringSkull', 9MB · 삼각형 19만 개, 커밋 고정)
     { url: 'https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@4995a638c96dbc94376d3d6164e70fee3ac7f7a2/Models/ScatteringSkull/glTF-Binary/ScatteringSkull.glb',
